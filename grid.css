@@ -1,0 +1,104 @@
+/* =============================================
+   src/styles/layouts/grid.css
+   Main Dashboard Layout
+   ============================================= */
+
+/* App wrapper */
+#app {
+  display: grid;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main";
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--header-height) 1fr;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    grid-template-columns var(--transition-slow),
+    background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+/* Collapsed sidebar */
+#app.sidebar-collapsed {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+/* Areas */
+#header {
+  grid-area: header;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+#sidebar {
+  grid-area: sidebar;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#main {
+  grid-area: main;
+  overflow-x: hidden;
+}
+
+/* Page content */
+.page-content {
+  padding: var(--spacing-xl);
+  max-width: var(--content-max-width);
+  width: 100%;
+}
+
+/* ==================
+   RESPONSIVE
+   ================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  #app {
+    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #app {
+    grid-template-areas:
+      "header header"
+      "main   main";
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-height) 1fr;
+  }
+
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: var(--z-overlay);
+    transform: translateX(-100%);
+    transition: transform var(--transition-slow);
+  }
+
+  #sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Overlay при відкритому sidebar на мобільному */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-bg-overlay);
+    z-index: calc(var(--z-overlay) - 1);
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+}
