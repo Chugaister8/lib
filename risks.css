@@ -1,4 +1,4 @@
-/* src/styles/pages/risks.css */
+  /* src/styles/pages/risks.css */
 
 /* ==================
    PAGE HEADER
@@ -32,6 +32,12 @@
   gap: 2px;
   border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--spacing-xl);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.risks-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .risks-tab {
@@ -42,10 +48,10 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   cursor: pointer;
+  white-space: nowrap;
   transition:
     color var(--transition-fast),
     border-color var(--transition-fast);
-  white-space: nowrap;
 }
 
 .risks-tab:hover {
@@ -55,6 +61,61 @@
 .risks-tab--active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+/* ==================
+   LAYOUT
+   ================== */
+.risks-layout {
+  display: flex;
+  gap: var(--spacing-lg);
+  align-items: flex-start;
+}
+
+.risks-layout__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.risks-layout__matrix {
+  flex-shrink: 0;
+}
+
+/* ==================
+   FILTER BADGE
+   ================== */
+.risks-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.risks-filter-badge .material-symbols-rounded {
+  font-size: 1rem;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.risks-filter-badge__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.risks-filter-badge__clear:hover {
+  opacity: 1;
+}
+
+.risks-filter-badge__clear .material-symbols-rounded {
+  font-size: 0.875rem;
 }
 
 /* ==================
@@ -167,7 +228,17 @@
 /* ==================
    RESPONSIVE
    ================== */
+@media (max-width: 1280px) {
+  .risk-details__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 1024px) {
+  .risks-layout {
+    flex-direction: column;
+  }
+
   .risk-details__grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -176,14 +247,5 @@
 @media (max-width: 768px) {
   .risk-details__grid {
     grid-template-columns: 1fr;
-  }
-
-  .risks-tabs {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .risks-tabs::-webkit-scrollbar {
-    display: none;
   }
 }
