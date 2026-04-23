@@ -62,10 +62,8 @@ const getCellColor = (prob, impact) => {
 };
 
 const renderMatrix = () => {
-  const risks = state.risks;
-
   const risksByCell = {};
-  risks.forEach(r => {
+  state.risks.forEach(r => {
     const impact = Math.max(r.financialImpact, r.nonFinancialImpact);
     const key    = `${r.probability}-${impact}`;
     if (!risksByCell[key]) risksByCell[key] = [];
@@ -412,19 +410,22 @@ const renderRegistry = () => {
   return `
     <div class="risks-layout">
 
-      <div class="risks-layout__main">
+      <div class="risks-layout__toolbar">
         ${renderToolbar()}
+      </div>
+
+      <div class="risks-layout__table">
         <div class="table-wrapper">
           <table class="table">
             <colgroup>
               <col style="width: 55px"  />
               <col style="width: auto"  />
-              <col style="width: 170px" />
-              <col style="width: 110px" />
-              <col style="width: 100px" />
-              <col style="width: 120px" />
-              <col style="width: 120px" />
-              <col style="width: 110px" />
+              <col style="width: 160px" />
+              <col style="width: 105px" />
+              <col style="width: 95px"  />
+              <col style="width: 115px" />
+              <col style="width: 115px" />
+              <col style="width: 105px" />
             </colgroup>
             <thead class="table__head">
               <tr>
@@ -443,6 +444,9 @@ const renderRegistry = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div class="risks-layout__footer">
         <div class="table-footer">
           <p class="table-footer__info">
             Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
@@ -588,13 +592,13 @@ const bindEvents = (container) => {
   container.querySelectorAll('.matrix__dot').forEach(dot => {
     dot.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id          = Number(dot.dataset.riskId);
+      const id = Number(dot.dataset.riskId);
       state.expandedRow = state.expandedRow === id ? null : id;
 
       const filtered = state.risks.filter(r =>
         r.riskName.toLowerCase().includes(state.searchQuery.toLowerCase())
       );
-      const idx        = filtered.findIndex(r => r.id === id);
+      const idx = filtered.findIndex(r => r.id === id);
       if (idx !== -1) {
         state.currentPage = Math.ceil((idx + 1) / state.perPage);
       }
