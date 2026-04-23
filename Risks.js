@@ -38,6 +38,145 @@ const iconBtn = (icon, title, action) => `
 `;
 
 /* ==================
+   RISK MATRIX
+   ================== */
+const MATRIX_COLORS = {
+  'Критичний':    '#7c3aed',
+  'Дуже високий': '#dc2626',
+  'Високий':      '#d97706',
+  'Середній':     '#ca8a04',
+  'Низький':      '#16a34a',
+};
+
+// Колір клітинки матриці (імовірність × вплив)
+const getCellColor = (prob, impact) => {
+  const score = prob * impact;
+  const level = getRiskLevel(score);
+  const colors = {
+    'Критичний':    '#4c1d95',
+    'Дуже високий': '#7f1d1d',
+    'Високий':      '#78350f',
+    'Середній':     '#713f12',
+    'Низький':      '#14532d',
+  };
+  return colors[level.label] ?? '#1e293b';
+};
+
+const renderMatrix = () => {
+  const risks = state.risks;
+
+  // Групуємо ризики по клітинках (prob, impact)
+  const risksByCell = {};
+  risks.forEach(r => {
+    const impact = Math.max(r.financialImpact, r.nonFinancialImpact);
+    const key    = `${r.probability}-${impact}`;
+    if (!risksByCell[key]) risksByCell[key] = [];
+    risksByCell[key].push(r);
+  });
+
+  // Рядки: імовірність 4→1 (зверху вниз)
+  // Колонки: вплив 1→5 (зліва направо)
+  const probs   = [4, 3, 2, 1];
+  const impacts = [1, 2, 3, 4, 5];
+
+  const probLabels = {
+    4: 'Дуже\nвисокий',
+    3: 'Високий',
+    2: 'Середній',
+    1: 'Низький',
+  };
+
+  const impactLabels = {
+    1: 'Низький',
+    2: 'Середній',
+    3: 'Високий',
+    4: 'Дуже\nвисокий',
+    5: 'Критичний',
+  };
+
+  const rows = probs.map(prob => {
+    const cells = impacts.map(impact => {
+      const score      = prob * impact;
+      const level      = getRiskLevel(score);
+      const cellColor  = getCellColor(prob, impact);
+      const key        = `${prob}-${impact}`;
+      const cellRisks  = risksByCell[key] ?? [];
+
+      const dots = cellRisks.map(r => `
+        <div class="matrix__dot"
+          style="background-color: ${MATRIX_COLORS[level.label] ?? '#fff'}"
+          title="${r.riskName} (бал: ${r.riskScore})"
+          data-risk-id="${r.id}">
+          ${r.id}
+        </div>
+      `).join('');
+
+      return `
+        <td class="matrix__cell"
+          style="background-color: ${cellColor}"
+          data-prob="${prob}"
+          data-impact="${impact}">
+          <div class="matrix__cell-inner">
+            <span class="matrix__score">${score}</span>
+            <div class="matrix__dots">${dots}</div>
+          </div>
+        </td>
+      `;
+    }).join('');
+
+    return `
+      <tr>
+        <td class="matrix__label matrix__label--row">
+          <span>${probLabels[prob]}</span>
+          <strong>${prob}</strong>
+        </td>
+        ${cells}
+      </tr>
+    `;
+  }).join('');
+
+  const impactHeaders = impacts.map(i => `
+    <th class="matrix__label matrix__label--col">
+      <strong>${i}</strong>
+      <span>${impactLabels[i]}</span>
+    </th>
+  `).join('');
+
+  return `
+    <div class="matrix-card">
+      <div class="matrix-card__header">
+        <p class="matrix-card__title">Матриця ризиків</p>
+        <p class="matrix-card__subtitle">Імовірність × Вплив</p>
+      </div>
+      <div class="matrix-card__body">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th class="matrix__corner">
+                <span class="matrix__corner-y">Імовірність</span>
+                <span class="matrix__corner-x">Вплив</span>
+              </th>
+              ${impactHeaders}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+      <div class="matrix-card__legend">
+        ${Object.entries(MATRIX_COLORS).map(([label, color]) => `
+          <div class="matrix-legend__item">
+            <span class="matrix-legend__dot" style="background-color:${color}"></span>
+            <span class="matrix-legend__label">${label}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+};
+
+/* ==================
    TABS
    ================== */
 const renderTabs = () => `
@@ -91,9 +230,7 @@ const renderToolbar = () => `
    ================== */
 const renderPagination = (totalPages) => {
   if (totalPages <= 1) return '';
-
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
   return `
     <div class="table-pagination">
       <button class="table-pagination__btn"
@@ -127,7 +264,7 @@ const renderDetails = (risk) => {
 
   return `
     <tr class="risk-details-row" id="details-${risk.id}">
-      <td colspan="7" class="risk-details-cell">
+      <td colspan="8" class="risk-details-cell">
         <div class="risk-details">
           <div class="risk-details__grid">
 
@@ -146,6 +283,11 @@ const renderDetails = (risk) => {
               <p class="risk-details__value">${risk.processName}</p>
             </div>
 
+            <div class="risk-details__group">
+              <p class="risk-details__label">Джерело інформації</p>
+              <p class="risk-details__value">${risk.infoSource}</p>
+            </div>
+
             <div class="risk-details__group risk-details__group--full">
               <p class="risk-details__label">Опис процесу</p>
               <p class="risk-details__value">${risk.processDesc}</p>
@@ -159,11 +301,6 @@ const renderDetails = (risk) => {
             <div class="risk-details__group risk-details__group--full">
               <p class="risk-details__label">Опис ризику</p>
               <p class="risk-details__value">${risk.riskDesc}</p>
-            </div>
-
-            <div class="risk-details__group">
-              <p class="risk-details__label">Джерело інформації</p>
-              <p class="risk-details__value">${risk.infoSource}</p>
             </div>
 
             <div class="risk-details__group risk-details__group--full">
@@ -282,42 +419,54 @@ const renderRegistry = () => {
        </td></tr>`;
 
   return `
-    ${renderToolbar()}
-    <div class="table-wrapper">
-      <table class="table">
-        <colgroup>
-          <col style="width: 60px"  />
-          <col style="width: auto"  />
-          <col style="width: 180px" />
-          <col style="width: 120px" />
-          <col style="width: 110px" />
-          <col style="width: 130px" />
-          <col style="width: 130px" />
-          <col style="width: 120px" />
-        </colgroup>
-        <thead class="table__head">
-          <tr>
-            <th class="table__th">№</th>
-            <th class="table__th">Назва ризику</th>
-            <th class="table__th">Напрям діяльності</th>
-            <th class="table__th table__th--center">Імовірність</th>
-            <th class="table__th table__th--center">Рівень (бал)</th>
-            <th class="table__th table__th--center">Рівень ризику</th>
-            <th class="table__th">Статус</th>
-            <th class="table__th table__th--right">Дії</th>
-          </tr>
-        </thead>
-        <tbody class="table__body">
-          ${rows}
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer">
-      <p class="table-footer__info">
-        Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
-        з ${filtered.length} записів
-      </p>
-      ${renderPagination(totalPages)}
+    <div class="risks-layout">
+
+      <!-- Ліва частина: toolbar + таблиця -->
+      <div class="risks-layout__main">
+        ${renderToolbar()}
+        <div class="table-wrapper">
+          <table class="table">
+            <colgroup>
+              <col style="width: 55px"  />
+              <col style="width: auto"  />
+              <col style="width: 170px" />
+              <col style="width: 110px" />
+              <col style="width: 100px" />
+              <col style="width: 120px" />
+              <col style="width: 120px" />
+              <col style="width: 110px" />
+            </colgroup>
+            <thead class="table__head">
+              <tr>
+                <th class="table__th">№</th>
+                <th class="table__th">Назва ризику</th>
+                <th class="table__th">Напрям діяльності</th>
+                <th class="table__th table__th--center">Імовірність</th>
+                <th class="table__th table__th--center">Рівень (бал)</th>
+                <th class="table__th table__th--center">Рівень ризику</th>
+                <th class="table__th">Статус</th>
+                <th class="table__th table__th--right">Дії</th>
+              </tr>
+            </thead>
+            <tbody class="table__body">
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <p class="table-footer__info">
+            Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
+            з ${filtered.length} записів
+          </p>
+          ${renderPagination(totalPages)}
+        </div>
+      </div>
+
+      <!-- Права частина: матриця -->
+      <div class="risks-layout__aside">
+        ${renderMatrix()}
+      </div>
+
     </div>
   `;
 };
@@ -385,8 +534,8 @@ const handleAction = (action, id, container) => {
       break;
     case 'delete':
       if (confirm('Видалити цей ризик?')) {
-        state.risks        = state.risks.filter(r => r.id !== id);
-        state.expandedRow  = null;
+        state.risks       = state.risks.filter(r => r.id !== id);
+        state.expandedRow = null;
         rerenderContent(container);
       }
       break;
@@ -418,6 +567,7 @@ const bindEvents = (container) => {
 
   // Row expand
   container.querySelectorAll('[data-risk-id]').forEach(row => {
+    if (row.classList.contains('risk-details-row')) return;
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-action]')) return;
       const id          = Number(row.dataset.riskId);
@@ -442,6 +592,30 @@ const bindEvents = (container) => {
       state.currentPage = Number(btn.dataset.page);
       state.expandedRow = null;
       rerenderContent(container);
+    });
+  });
+
+  // Matrix dot click — підсвічує рядок в таблиці
+  container.querySelectorAll('.matrix__dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id          = Number(dot.dataset.riskId);
+      state.expandedRow = state.expandedRow === id ? null : id;
+
+      // Знаходимо сторінку де є цей ризик
+      const filtered   = state.risks.filter(r =>
+        r.riskName.toLowerCase().includes(state.searchQuery.toLowerCase())
+      );
+      const idx        = filtered.findIndex(r => r.id === id);
+      state.currentPage = Math.ceil((idx + 1) / state.perPage);
+
+      rerenderContent(container);
+
+      // Скролл до рядка
+      setTimeout(() => {
+        container.querySelector(`[data-risk-id="${id}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
     });
   });
 
