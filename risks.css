@@ -1,0 +1,189 @@
+/* src/styles/pages/risks.css */
+
+/* ==================
+   PAGE HEADER
+   ================== */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.page-header__title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: var(--line-height-heading);
+}
+
+.page-header__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-2xs);
+}
+
+/* ==================
+   TABS
+   ================== */
+.risks-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-xl);
+}
+
+.risks-tab {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.risks-tab:hover {
+  color: var(--color-text);
+}
+
+.risks-tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* ==================
+   RISK NAME CELL
+   ================== */
+.risk-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.risk-name__chevron {
+  font-family: 'Material Symbols Rounded';
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.risk-name__chevron--open {
+  transform: rotate(90deg);
+  color: var(--color-primary);
+}
+
+.risk-name__text {
+  font-weight: var(--font-weight-medium);
+}
+
+/* ==================
+   ACCORDION DETAILS
+   ================== */
+.risk-details-cell {
+  padding: 0 !important;
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.risk-details {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-left: 3px solid var(--color-primary);
+}
+
+.risk-details__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.risk-details__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xs);
+}
+
+.risk-details__group--full {
+  grid-column: 1 / -1;
+}
+
+.risk-details__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.risk-details__value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: var(--line-height-base);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+/* ==================
+   PLACEHOLDER
+   ================== */
+.risks-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+  text-align: center;
+}
+
+.risks-placeholder__icon {
+  font-family: 'Material Symbols Rounded';
+  font-size: 3rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+}
+
+.risks-placeholder__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.risks-placeholder__text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ==================
+   RESPONSIVE
+   ================== */
+@media (max-width: 1024px) {
+  .risk-details__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .risk-details__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .risks-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .risks-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
