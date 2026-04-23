@@ -1,0 +1,243 @@
+/* =============================================
+   src/styles/components/button.css
+   ============================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    opacity var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ==================
+   VARIANTS
+   ================== */
+
+/* Primary */
+.btn--primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid var(--color-primary);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn--primary:active {
+  background-color: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}
+
+/* Secondary */
+.btn--secondary {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+.btn--secondary:hover {
+  background-color: var(--color-primary-subtle);
+}
+
+.btn--secondary:active {
+  background-color: var(--color-primary-muted);
+}
+
+/* Ghost */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+}
+
+.btn--ghost:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.btn--ghost:active {
+  background-color: var(--color-border);
+}
+
+/* Danger */
+.btn--danger {
+  background-color: var(--color-danger);
+  color: #ffffff;
+  border: 1px solid var(--color-danger);
+}
+
+.btn--danger:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* Danger outline */
+.btn--danger-outline {
+  background-color: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.btn--danger-outline:hover {
+  background-color: var(--color-danger-subtle);
+}
+
+/* Success */
+.btn--success {
+  background-color: var(--color-success);
+  color: #ffffff;
+  border: 1px solid var(--color-success);
+}
+
+.btn--success:hover {
+  background-color: #15803d;
+  border-color: #15803d;
+}
+
+/* ==================
+   SIZES
+   ================== */
+
+.btn--xs {
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+}
+
+.btn--sm {
+  padding: 0.375rem 0.75rem;
+  font-size: var(--font-size-xs);
+}
+
+.btn--md {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+}
+
+.btn--lg {
+  padding: 0.675rem 1.25rem;
+  font-size: var(--font-size-base);
+}
+
+.btn--xl {
+  padding: 0.875rem 1.75rem;
+  font-size: var(--font-size-lg);
+}
+
+/* ==================
+   STATES
+   ================== */
+
+.btn:disabled,
+.btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn--loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.btn--loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: var(--radius-full);
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==================
+   ICON BUTTON
+   ================== */
+
+.btn--icon {
+  padding: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.btn--icon.btn--sm {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0.25rem;
+}
+
+.btn--icon.btn--lg {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.75rem;
+}
+
+/* ==================
+   FULL WIDTH
+   ================== */
+
+.btn--block {
+  width: 100%;
+}
+
+/* ==================
+   BUTTON GROUP
+   ================== */
+
+.btn-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.btn-group .btn + .btn {
+  margin-left: -1px;
+}
+
+/* ==================
+   ICON IN BUTTON
+   ================== */
+
+.btn .material-symbols-rounded {
+  font-size: 1.125rem;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  flex-shrink: 0;
+}
