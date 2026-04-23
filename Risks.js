@@ -8,25 +8,19 @@ import {
   getRiskLevel,
 } from '../../data/risks.mock.js';
 
-/* ==================
-   TABS
-   ================== */
 const TABS = [
-  { id: 'registry',  label: 'Реєстр ризиків'         },
-  { id: 'measures',  label: 'Реєстр планів заходів'   },
-  { id: 'thematic',  label: 'База тематичних оцінок'  },
+  { id: 'registry', label: 'Реєстр ризиків'        },
+  { id: 'measures', label: 'Реєстр планів заходів'  },
+  { id: 'thematic', label: 'База тематичних оцінок' },
 ];
 
-/* ==================
-   STATE
-   ================== */
 let state = {
-  activeTab:    'registry',
-  expandedRow:  null,
-  searchQuery:  '',
-  sortField:    'id',
-  sortDir:      'asc',
-  risks:        [...RISKS_MOCK],
+  activeTab:   'registry',
+  expandedRow: null,
+  searchQuery: '',
+  currentPage: 1,
+  perPage:     10,
+  risks:       [...RISKS_MOCK],
 };
 
 /* ==================
@@ -44,7 +38,7 @@ const iconBtn = (icon, title, action) => `
 `;
 
 /* ==================
-   RENDER TABS
+   TABS
    ================== */
 const renderTabs = () => `
   <div class="risks-tabs">
@@ -59,7 +53,7 @@ const renderTabs = () => `
 `;
 
 /* ==================
-   RENDER TOOLBAR
+   TOOLBAR
    ================== */
 const renderToolbar = () => `
   <div class="table-toolbar">
@@ -93,7 +87,38 @@ const renderToolbar = () => `
 `;
 
 /* ==================
-   RENDER ACCORDION DETAILS
+   PAGINATION
+   ================== */
+const renderPagination = (totalPages) => {
+  if (totalPages <= 1) return '';
+
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  return `
+    <div class="table-pagination">
+      <button class="table-pagination__btn"
+        data-page="${state.currentPage - 1}"
+        ${state.currentPage === 1 ? 'disabled' : ''}>
+        <span class="table-pagination__icon material-symbols-rounded">chevron_left</span>
+      </button>
+      ${pages.map(p => `
+        <button
+          class="table-pagination__btn ${p === state.currentPage ? 'table-pagination__btn--active' : ''}"
+          data-page="${p}">
+          ${p}
+        </button>
+      `).join('')}
+      <button class="table-pagination__btn"
+        data-page="${state.currentPage + 1}"
+        ${state.currentPage === totalPages ? 'disabled' : ''}>
+        <span class="table-pagination__icon material-symbols-rounded">chevron_right</span>
+      </button>
+    </div>
+  `;
+};
+
+/* ==================
+   ACCORDION DETAILS
    ================== */
 const renderDetails = (risk) => {
   const prob    = PROBABILITY_LEVELS[risk.probability];
@@ -102,9 +127,8 @@ const renderDetails = (risk) => {
 
   return `
     <tr class="risk-details-row" id="details-${risk.id}">
-      <td colspan="8" class="risk-details-cell">
+      <td colspan="7" class="risk-details-cell">
         <div class="risk-details">
-
           <div class="risk-details__grid">
 
             <div class="risk-details__group">
@@ -122,7 +146,7 @@ const renderDetails = (risk) => {
               <p class="risk-details__value">${risk.processName}</p>
             </div>
 
-            <div class="risk-details__group">
+            <div class="risk-details__group risk-details__group--full">
               <p class="risk-details__label">Опис процесу</p>
               <p class="risk-details__value">${risk.processDesc}</p>
             </div>
@@ -191,13 +215,13 @@ const renderDetails = (risk) => {
 };
 
 /* ==================
-   RENDER TABLE ROW
+   TABLE ROW
    ================== */
 const renderRow = (risk) => {
-  const level   = getRiskLevel(risk.riskScore);
-  const prob    = PROBABILITY_LEVELS[risk.probability];
-  const status  = RISK_STATUSES[risk.status];
-  const isOpen  = state.expandedRow === risk.id;
+  const level  = getRiskLevel(risk.riskScore);
+  const prob   = PROBABILITY_LEVELS[risk.probability];
+  const status = RISK_STATUSES[risk.status];
+  const isOpen = state.expandedRow === risk.id;
 
   return `
     <tr class="table__row table__row--clickable ${isOpen ? 'table__row--selected' : ''}"
@@ -211,7 +235,7 @@ const renderRow = (risk) => {
           <span class="risk-name__text">${risk.riskName}</span>
         </div>
       </td>
-      <td class="table__td table__td--nowrap">${risk.direction}</td>
+      <td class="table__td">${risk.direction}</td>
       <td class="table__td table__td--center">
         ${badge(risk.probability, prob.class)}
       </td>
@@ -226,9 +250,9 @@ const renderRow = (risk) => {
       </td>
       <td class="table__td table__td--actions">
         <div class="table__actions">
-          ${iconBtn('edit',       'Редагувати', 'edit'  )}
-          ${iconBtn('content_copy', 'Копіювати', 'copy' )}
-          ${iconBtn('delete',     'Видалити',   'delete')}
+          ${iconBtn('edit',         'Редагувати', 'edit'  )}
+          ${iconBtn('content_copy', 'Копіювати',  'copy'  )}
+          ${iconBtn('delete',       'Видалити',   'delete')}
         </div>
       </td>
     </tr>
@@ -237,7 +261,7 @@ const renderRow = (risk) => {
 };
 
 /* ==================
-   RENDER REGISTRY TAB
+   REGISTRY TAB
    ================== */
 const renderRegistry = () => {
   const filtered = state.risks.filter(r =>
@@ -245,8 +269,12 @@ const renderRegistry = () => {
     r.direction.toLowerCase().includes(state.searchQuery.toLowerCase())
   );
 
-  const rows = filtered.length
-    ? filtered.map(renderRow).join('')
+  const totalPages = Math.ceil(filtered.length / state.perPage);
+  const start      = (state.currentPage - 1) * state.perPage;
+  const paginated  = filtered.slice(start, start + state.perPage);
+
+  const rows = paginated.length
+    ? paginated.map(renderRow).join('')
     : `<tr><td colspan="8" class="table__empty">
         <span class="table__empty-icon material-symbols-rounded">inbox</span>
         <p class="table__empty-title">Ризиків не знайдено</p>
@@ -257,16 +285,26 @@ const renderRegistry = () => {
     ${renderToolbar()}
     <div class="table-wrapper">
       <table class="table">
+        <colgroup>
+          <col style="width: 60px"  />
+          <col style="width: auto"  />
+          <col style="width: 180px" />
+          <col style="width: 120px" />
+          <col style="width: 110px" />
+          <col style="width: 130px" />
+          <col style="width: 130px" />
+          <col style="width: 120px" />
+        </colgroup>
         <thead class="table__head">
           <tr>
-            <th class="table__th" style="width:60px">№</th>
+            <th class="table__th">№</th>
             <th class="table__th">Назва ризику</th>
             <th class="table__th">Напрям діяльності</th>
             <th class="table__th table__th--center">Імовірність</th>
             <th class="table__th table__th--center">Рівень (бал)</th>
             <th class="table__th table__th--center">Рівень ризику</th>
             <th class="table__th">Статус</th>
-            <th class="table__th table__th--right" style="width:120px">Дії</th>
+            <th class="table__th table__th--right">Дії</th>
           </tr>
         </thead>
         <tbody class="table__body">
@@ -276,25 +314,39 @@ const renderRegistry = () => {
     </div>
     <div class="table-footer">
       <p class="table-footer__info">
-        Показано ${filtered.length} з ${state.risks.length} записів
+        Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
+        з ${filtered.length} записів
       </p>
+      ${renderPagination(totalPages)}
     </div>
   `;
 };
 
 /* ==================
-   RENDER PLACEHOLDER TABS
+   PLACEHOLDER
    ================== */
 const renderPlaceholder = (title) => `
   <div class="risks-placeholder">
-    <span class="material-symbols-rounded risks-placeholder__icon">construction</span>
+    <span class="risks-placeholder__icon material-symbols-rounded">construction</span>
     <p class="risks-placeholder__title">${title}</p>
     <p class="risks-placeholder__text">Розділ в розробці</p>
   </div>
 `;
 
 /* ==================
-   RENDER PAGE
+   TAB CONTENT
+   ================== */
+const renderTabContent = () => {
+  switch (state.activeTab) {
+    case 'registry': return renderRegistry();
+    case 'measures': return renderPlaceholder('Реєстр планів заходів');
+    case 'thematic': return renderPlaceholder('База тематичних оцінок');
+    default:         return renderRegistry();
+  }
+};
+
+/* ==================
+   PAGE
    ================== */
 const renderPage = () => `
   <div class="risks-page">
@@ -304,21 +356,40 @@ const renderPage = () => `
         <p class="page-header__subtitle">Управління ризиками підприємства</p>
       </div>
     </div>
-
     ${renderTabs()}
-
     <div class="risks-content" id="risks-content">
       ${renderTabContent()}
     </div>
   </div>
 `;
 
-const renderTabContent = () => {
-  switch (state.activeTab) {
-    case 'registry': return renderRegistry();
-    case 'measures': return renderPlaceholder('Реєстр планів заходів');
-    case 'thematic': return renderPlaceholder('База тематичних оцінок');
-    default:         return renderRegistry();
+/* ==================
+   ACTIONS
+   ================== */
+const handleAction = (action, id, container) => {
+  switch (action) {
+    case 'edit':
+      console.log('[Risks] Edit:', id);
+      break;
+    case 'copy':
+      const risk = state.risks.find(r => r.id === id);
+      if (risk) {
+        const copy = {
+          ...risk,
+          id:       Date.now(),
+          riskName: `${risk.riskName} (копія)`,
+        };
+        state.risks.push(copy);
+        rerenderContent(container);
+      }
+      break;
+    case 'delete':
+      if (confirm('Видалити цей ризик?')) {
+        state.risks        = state.risks.filter(r => r.id !== id);
+        state.expandedRow  = null;
+        rerenderContent(container);
+      }
+      break;
   }
 };
 
@@ -331,6 +402,7 @@ const bindEvents = (container) => {
     btn.addEventListener('click', () => {
       state.activeTab   = btn.dataset.tab;
       state.expandedRow = null;
+      state.currentPage = 1;
       rerender(container);
     });
   });
@@ -339,6 +411,8 @@ const bindEvents = (container) => {
   container.querySelector('#risk-search')
     ?.addEventListener('input', (e) => {
       state.searchQuery = e.target.value;
+      state.currentPage = 1;
+      state.expandedRow = null;
       rerenderContent(container);
     });
 
@@ -346,7 +420,7 @@ const bindEvents = (container) => {
   container.querySelectorAll('[data-risk-id]').forEach(row => {
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-action]')) return;
-      const id = Number(row.dataset.riskId);
+      const id          = Number(row.dataset.riskId);
       state.expandedRow = state.expandedRow === id ? null : id;
       rerenderContent(container);
     });
@@ -362,47 +436,25 @@ const bindEvents = (container) => {
     });
   });
 
+  // Pagination
+  container.querySelectorAll('[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.currentPage = Number(btn.dataset.page);
+      state.expandedRow = null;
+      rerenderContent(container);
+    });
+  });
+
   // Export
   container.querySelector('#export-excel')
-    ?.addEventListener('click', () => exportExcel());
+    ?.addEventListener('click', () => console.log('[Risks] Export Excel'));
   container.querySelector('#export-pdf')
-    ?.addEventListener('click', () => exportPdf());
+    ?.addEventListener('click', () => console.log('[Risks] Export PDF'));
 
   // Add
   container.querySelector('#add-risk')
-    ?.addEventListener('click', () => {
-      console.log('[Risks] Add risk — modal coming soon');
-    });
+    ?.addEventListener('click', () => console.log('[Risks] Add risk'));
 };
-
-const handleAction = (action, id, container) => {
-  switch (action) {
-    case 'edit':
-      console.log('[Risks] Edit:', id);
-      break;
-    case 'copy':
-      const risk = state.risks.find(r => r.id === id);
-      if (risk) {
-        const copy = { ...risk, id: Date.now(), riskName: `${risk.riskName} (копія)` };
-        state.risks.push(copy);
-        rerenderContent(container);
-      }
-      break;
-    case 'delete':
-      if (confirm('Видалити цей ризик?')) {
-        state.risks = state.risks.filter(r => r.id !== id);
-        if (state.expandedRow === id) state.expandedRow = null;
-        rerenderContent(container);
-      }
-      break;
-  }
-};
-
-/* ==================
-   EXPORT (placeholder)
-   ================== */
-const exportExcel = () => console.log('[Risks] Export Excel — coming soon');
-const exportPdf   = () => console.log('[Risks] Export PDF — coming soon');
 
 /* ==================
    RE-RENDER
@@ -427,6 +479,8 @@ const Risks = async (container) => {
     activeTab:   'registry',
     expandedRow: null,
     searchQuery: '',
+    currentPage: 1,
+    perPage:     10,
     risks:       [...RISKS_MOCK],
   };
 
