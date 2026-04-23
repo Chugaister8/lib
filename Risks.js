@@ -48,12 +48,11 @@ const MATRIX_COLORS = {
   'Низький':      '#16a34a',
 };
 
-// Колір клітинки матриці (імовірність × вплив)
 const getCellColor = (prob, impact) => {
   const score = prob * impact;
   const level = getRiskLevel(score);
   const colors = {
-    'Критичний':    '#4c1d95',
+    'Критичний':    '#3b0764',
     'Дуже високий': '#7f1d1d',
     'Високий':      '#78350f',
     'Середній':     '#713f12',
@@ -65,7 +64,6 @@ const getCellColor = (prob, impact) => {
 const renderMatrix = () => {
   const risks = state.risks;
 
-  // Групуємо ризики по клітинках (prob, impact)
   const risksByCell = {};
   risks.forEach(r => {
     const impact = Math.max(r.financialImpact, r.nonFinancialImpact);
@@ -74,8 +72,6 @@ const renderMatrix = () => {
     risksByCell[key].push(r);
   });
 
-  // Рядки: імовірність 4→1 (зверху вниз)
-  // Колонки: вплив 1→5 (зліва направо)
   const probs   = [4, 3, 2, 1];
   const impacts = [1, 2, 3, 4, 5];
 
@@ -96,15 +92,15 @@ const renderMatrix = () => {
 
   const rows = probs.map(prob => {
     const cells = impacts.map(impact => {
-      const score      = prob * impact;
-      const level      = getRiskLevel(score);
-      const cellColor  = getCellColor(prob, impact);
-      const key        = `${prob}-${impact}`;
-      const cellRisks  = risksByCell[key] ?? [];
+      const score     = prob * impact;
+      const level     = getRiskLevel(score);
+      const cellColor = getCellColor(prob, impact);
+      const key       = `${prob}-${impact}`;
+      const cellRisks = risksByCell[key] ?? [];
 
       const dots = cellRisks.map(r => `
         <div class="matrix__dot"
-          style="background-color: ${MATRIX_COLORS[level.label] ?? '#fff'}"
+          style="background-color:${MATRIX_COLORS[level.label] ?? '#fff'}"
           title="${r.riskName} (бал: ${r.riskScore})"
           data-risk-id="${r.id}">
           ${r.id}
@@ -112,10 +108,7 @@ const renderMatrix = () => {
       `).join('');
 
       return `
-        <td class="matrix__cell"
-          style="background-color: ${cellColor}"
-          data-prob="${prob}"
-          data-impact="${impact}">
+        <td class="matrix__cell" style="background-color:${cellColor}">
           <div class="matrix__cell-inner">
             <span class="matrix__score">${score}</span>
             <div class="matrix__dots">${dots}</div>
@@ -159,9 +152,7 @@ const renderMatrix = () => {
               ${impactHeaders}
             </tr>
           </thead>
-          <tbody>
-            ${rows}
-          </tbody>
+          <tbody>${rows}</tbody>
         </table>
       </div>
       <div class="matrix-card__legend">
@@ -421,7 +412,6 @@ const renderRegistry = () => {
   return `
     <div class="risks-layout">
 
-      <!-- Ліва частина: toolbar + таблиця -->
       <div class="risks-layout__main">
         ${renderToolbar()}
         <div class="table-wrapper">
@@ -462,7 +452,6 @@ const renderRegistry = () => {
         </div>
       </div>
 
-      <!-- Права частина: матриця -->
       <div class="risks-layout__aside">
         ${renderMatrix()}
       </div>
@@ -595,23 +584,23 @@ const bindEvents = (container) => {
     });
   });
 
-  // Matrix dot click — підсвічує рядок в таблиці
+  // Matrix dot click
   container.querySelectorAll('.matrix__dot').forEach(dot => {
     dot.addEventListener('click', (e) => {
       e.stopPropagation();
       const id          = Number(dot.dataset.riskId);
       state.expandedRow = state.expandedRow === id ? null : id;
 
-      // Знаходимо сторінку де є цей ризик
-      const filtered   = state.risks.filter(r =>
+      const filtered = state.risks.filter(r =>
         r.riskName.toLowerCase().includes(state.searchQuery.toLowerCase())
       );
       const idx        = filtered.findIndex(r => r.id === id);
-      state.currentPage = Math.ceil((idx + 1) / state.perPage);
+      if (idx !== -1) {
+        state.currentPage = Math.ceil((idx + 1) / state.perPage);
+      }
 
       rerenderContent(container);
 
-      // Скролл до рядка
       setTimeout(() => {
         container.querySelector(`[data-risk-id="${id}"]`)
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
