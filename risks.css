@@ -61,22 +61,35 @@
    LAYOUT
    ================== */
 .risks-layout {
-  display: flex;
-  gap: var(--spacing-lg);
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "toolbar aside"
+    "table   aside"
+    "footer  aside";
+  gap: var(--spacing-md);
+  align-items: start;
 }
 
-.risks-layout__main {
-  flex: 0 0 auto;
-  width: 700px;
+.risks-layout__toolbar {
+  grid-area: toolbar;
+}
+
+.risks-layout__table {
+  grid-area: table;
   min-width: 0;
 }
 
+.risks-layout__footer {
+  grid-area: footer;
+}
+
 .risks-layout__aside {
-  flex: 1 1 auto;
-  min-width: 280px;
+  grid-area: aside;
   position: sticky;
   top: calc(var(--header-height) + var(--spacing-lg));
+  align-self: start;
 }
 
 /* ==================
@@ -182,7 +195,7 @@
 }
 
 .matrix-card__body {
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   overflow-x: auto;
 }
 
@@ -197,17 +210,17 @@
 
 .matrix__corner {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
 }
 
 .matrix__corner-y {
   position: absolute;
-  top: 6px;
-  left: 4px;
-  font-size: 0.55rem;
+  top: 4px;
+  left: 3px;
+  font-size: 0.5rem;
   color: var(--color-text-muted);
   writing-mode: vertical-lr;
   transform: rotate(180deg);
@@ -215,29 +228,29 @@
 
 .matrix__corner-x {
   position: absolute;
-  bottom: 6px;
-  right: 4px;
-  font-size: 0.55rem;
+  bottom: 4px;
+  right: 3px;
+  font-size: 0.5rem;
   color: var(--color-text-muted);
 }
 
 .matrix__label--col {
   text-align: center;
-  padding: var(--spacing-xs) 2px;
+  padding: 4px 2px;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
 }
 
 .matrix__label--col strong {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
 }
 
 .matrix__label--col span {
   display: block;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--color-text-muted);
   white-space: pre-line;
   line-height: 1.2;
@@ -245,22 +258,22 @@
 
 .matrix__label--row {
   text-align: center;
-  padding: var(--spacing-xs) 4px;
+  padding: 4px 2px;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
-  width: 64px;
+  width: 52px;
 }
 
 .matrix__label--row strong {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
 }
 
 .matrix__label--row span {
   display: block;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   color: var(--color-text-muted);
   white-space: pre-line;
   line-height: 1.2;
@@ -268,7 +281,7 @@
 
 .matrix__cell {
   border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 4px;
+  padding: 3px;
   vertical-align: top;
   transition: filter var(--transition-fast);
 }
@@ -281,12 +294,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  min-height: 48px;
+  gap: 2px;
+  min-height: 42px;
 }
 
 .matrix__score {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: var(--font-weight-bold);
   color: rgba(255, 255, 255, 0.4);
   line-height: 1;
@@ -300,13 +313,13 @@
 }
 
 .matrix__dot {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: var(--font-weight-bold);
   color: #ffffff;
   cursor: pointer;
@@ -329,26 +342,26 @@
 .matrix-card__legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs) var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-top: 1px solid var(--color-border);
 }
 
 .matrix-legend__item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 4px;
 }
 
 .matrix-legend__dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
 .matrix-legend__label {
-  font-size: var(--font-size-xs);
+  font-size: 0.65rem;
   color: var(--color-text-secondary);
 }
 
@@ -389,16 +402,16 @@
    ================== */
 @media (max-width: 1280px) {
   .risks-layout {
-    flex-direction: column;
-  }
-
-  .risks-layout__main {
-    width: 100%;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "toolbar"
+      "table"
+      "footer"
+      "aside";
   }
 
   .risks-layout__aside {
     position: static;
-    width: 100%;
   }
 }
 
