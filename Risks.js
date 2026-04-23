@@ -8,6 +8,8 @@ import {
   getRiskLevel,
 } from '../../data/risks.mock.js';
 
+import { createRiskMatrix } from '../../components/RiskMatrix.js';
+
 const TABS = [
   { id: 'registry', label: 'Реєстр ризиків'        },
   { id: 'measures', label: 'Реєстр планів заходів'  },
@@ -15,12 +17,13 @@ const TABS = [
 ];
 
 let state = {
-  activeTab:   'registry',
-  expandedRow: null,
-  searchQuery: '',
-  currentPage: 1,
-  perPage:     10,
-  risks:       [...RISKS_MOCK],
+  activeTab:    'registry',
+  expandedRow:  null,
+  searchQuery:  '',
+  currentPage:  1,
+  perPage:      10,
+  matrixFilter: null,
+  risks:        [...RISKS_MOCK],
 };
 
 /* ==================
@@ -68,6 +71,15 @@ const renderToolbar = () => `
           value="${state.searchQuery}"
         />
       </div>
+      ${state.matrixFilter ? `
+        <div class="risks-filter-badge">
+          <span class="material-symbols-rounded">filter_alt</span>
+          Фільтр матриці активний
+          <button class="risks-filter-badge__clear" id="clear-matrix-filter">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      ` : ''}
     </div>
     <div class="table-toolbar__right">
       <button class="btn btn--ghost btn--sm" id="export-excel">
@@ -127,7 +139,7 @@ const renderDetails = (risk) => {
 
   return `
     <tr class="risk-details-row" id="details-${risk.id}">
-      <td colspan="7" class="risk-details-cell">
+      <td colspan="8" class="risk-details-cell">
         <div class="risk-details">
           <div class="risk-details__grid">
 
@@ -264,10 +276,17 @@ const renderRow = (risk) => {
    REGISTRY TAB
    ================== */
 const renderRegistry = () => {
-  const filtered = state.risks.filter(r =>
+  let filtered = state.risks.filter(r =>
     r.riskName.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
     r.direction.toLowerCase().includes(state.searchQuery.toLowerCase())
   );
+
+  if (state.matrixFilter) {
+    filtered = filtered.filter(r =>
+      r.probability     === state.matrixFilter.probability &&
+      r.financialImpact === state.matrixFilter.impact
+    );
+  }
 
   const totalPages = Math.ceil(filtered.length / state.perPage);
   const start      = (state.currentPage - 1) * state.perPage;
@@ -282,42 +301,50 @@ const renderRegistry = () => {
        </td></tr>`;
 
   return `
-    ${renderToolbar()}
-    <div class="table-wrapper">
-      <table class="table">
-        <colgroup>
-          <col style="width: 60px"  />
-          <col style="width: auto"  />
-          <col style="width: 180px" />
-          <col style="width: 120px" />
-          <col style="width: 110px" />
-          <col style="width: 130px" />
-          <col style="width: 130px" />
-          <col style="width: 120px" />
-        </colgroup>
-        <thead class="table__head">
-          <tr>
-            <th class="table__th">№</th>
-            <th class="table__th">Назва ризику</th>
-            <th class="table__th">Напрям діяльності</th>
-            <th class="table__th table__th--center">Імовірність</th>
-            <th class="table__th table__th--center">Рівень (бал)</th>
-            <th class="table__th table__th--center">Рівень ризику</th>
-            <th class="table__th">Статус</th>
-            <th class="table__th table__th--right">Дії</th>
-          </tr>
-        </thead>
-        <tbody class="table__body">
-          ${rows}
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer">
-      <p class="table-footer__info">
-        Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
-        з ${filtered.length} записів
-      </p>
-      ${renderPagination(totalPages)}
+    <div class="risks-layout">
+
+      <div class="risks-layout__main">
+        ${renderToolbar()}
+        <div class="table-wrapper">
+          <table class="table">
+            <colgroup>
+              <col style="width: 60px"  />
+              <col style="width: auto"  />
+              <col style="width: 180px" />
+              <col style="width: 120px" />
+              <col style="width: 110px" />
+              <col style="width: 130px" />
+              <col style="width: 130px" />
+              <col style="width: 120px" />
+            </colgroup>
+            <thead class="table__head">
+              <tr>
+                <th class="table__th">№</th>
+                <th class="table__th">Назва ризику</th>
+                <th class="table__th">Напрям діяльності</th>
+                <th class="table__th table__th--center">Імовірність</th>
+                <th class="table__th table__th--center">Рівень (бал)</th>
+                <th class="table__th table__th--center">Рівень ризику</th>
+                <th class="table__th">Статус</th>
+                <th class="table__th table__th--right">Дії</th>
+              </tr>
+            </thead>
+            <tbody class="table__body">
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <p class="table-footer__info">
+            Показано ${Math.min(start + 1, filtered.length)}–${Math.min(start + state.perPage, filtered.length)}
+            з ${filtered.length} записів
+          </p>
+          ${renderPagination(totalPages)}
+        </div>
+      </div>
+
+      <div class="risks-layout__matrix" id="risk-matrix-container"></div>
+
     </div>
   `;
 };
@@ -385,8 +412,8 @@ const handleAction = (action, id, container) => {
       break;
     case 'delete':
       if (confirm('Видалити цей ризик?')) {
-        state.risks        = state.risks.filter(r => r.id !== id);
-        state.expandedRow  = null;
+        state.risks       = state.risks.filter(r => r.id !== id);
+        state.expandedRow = null;
         rerenderContent(container);
       }
       break;
@@ -400,9 +427,10 @@ const bindEvents = (container) => {
   // Tabs
   container.querySelectorAll('[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
-      state.activeTab   = btn.dataset.tab;
-      state.expandedRow = null;
-      state.currentPage = 1;
+      state.activeTab    = btn.dataset.tab;
+      state.expandedRow  = null;
+      state.currentPage  = 1;
+      state.matrixFilter = null;
       rerender(container);
     });
   });
@@ -410,9 +438,17 @@ const bindEvents = (container) => {
   // Search
   container.querySelector('#risk-search')
     ?.addEventListener('input', (e) => {
-      state.searchQuery = e.target.value;
-      state.currentPage = 1;
-      state.expandedRow = null;
+      state.searchQuery  = e.target.value;
+      state.currentPage  = 1;
+      state.expandedRow  = null;
+      rerenderContent(container);
+    });
+
+  // Clear matrix filter badge
+  container.querySelector('#clear-matrix-filter')
+    ?.addEventListener('click', () => {
+      state.matrixFilter = null;
+      state.currentPage  = 1;
       rerenderContent(container);
     });
 
@@ -454,6 +490,21 @@ const bindEvents = (container) => {
   // Add
   container.querySelector('#add-risk')
     ?.addEventListener('click', () => console.log('[Risks] Add risk'));
+
+  // Matrix
+  const matrixContainer = container.querySelector('#risk-matrix-container');
+  if (matrixContainer) {
+    createRiskMatrix(
+      matrixContainer,
+      state.risks,
+      (filter) => {
+        state.matrixFilter = filter;
+        state.currentPage  = 1;
+        state.expandedRow  = null;
+        rerenderContent(container);
+      }
+    );
+  }
 };
 
 /* ==================
@@ -476,12 +527,13 @@ const rerenderContent = (container) => {
    ================== */
 const Risks = async (container) => {
   state = {
-    activeTab:   'registry',
-    expandedRow: null,
-    searchQuery: '',
-    currentPage: 1,
-    perPage:     10,
-    risks:       [...RISKS_MOCK],
+    activeTab:    'registry',
+    expandedRow:  null,
+    searchQuery:  '',
+    currentPage:  1,
+    perPage:      10,
+    matrixFilter: null,
+    risks:        [...RISKS_MOCK],
   };
 
   container.innerHTML = renderPage();
