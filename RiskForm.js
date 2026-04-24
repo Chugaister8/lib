@@ -1,6 +1,5 @@
 // src/scripts/components/RiskForm.js
 
-import { openModal, closeModal } from '../utils/modal.js';
 import { getRiskLevel } from '../data/risks.mock.js';
 
 const PROBABILITY_OPTIONS = [
@@ -45,37 +44,41 @@ const RISK_INSTRUMENTS = [
 
 const generateId = () => {
   const year = new Date().getFullYear();
-  const num  = String(Math.floor(Math.random() * 900) + 100);
+  const num  = String(Math.floor(Math.random() * 900) + 100).padStart(3, '0');
   return `R-${year}-${num}`;
 };
 
 /* ==================
-   RENDER RADIO GROUP
+   RADIO CARDS
    ================== */
-const renderRadioGroup = (name, options, selectedValue) =>
-  options.map(opt => `
-    <label class="risk-form__radio ${Number(selectedValue) === opt.value ? 'risk-form__radio--selected' : ''}">
-      <input
-        type="radio"
-        name="${name}"
-        value="${opt.value}"
-        ${Number(selectedValue) === opt.value ? 'checked' : ''}
-        class="risk-form__radio-input"
-      />
-      <div class="risk-form__radio-content">
-        <span class="risk-form__radio-label">${opt.label}</span>
-        <span class="risk-form__radio-desc">${opt.desc}</span>
-      </div>
-    </label>
-  `).join('');
+const renderRadioGroup = (name, options, selectedValue) => `
+  <div class="risk-form__radio-cards">
+    ${options.map(opt => `
+      <label class="risk-form__radio-card ${Number(selectedValue) === opt.value ? 'risk-form__radio-card--selected' : ''}">
+        <input
+          type="radio"
+          name="${name}"
+          value="${opt.value}"
+          ${Number(selectedValue) === opt.value ? 'checked' : ''}
+          class="risk-form__radio-input"
+        />
+        <span class="risk-form__radio-card-value risk-form__radio-card-value--${opt.value}">
+          ${opt.value}
+        </span>
+        <span class="risk-form__radio-card-label">${opt.label.split('—')[1].trim()}</span>
+        <span class="risk-form__radio-card-desc">${opt.desc}</span>
+      </label>
+    `).join('')}
+  </div>
+`;
 
 /* ==================
-   RENDER SCORE PREVIEW
+   SCORE PREVIEW
    ================== */
 const renderScorePreview = (probability, financialImpact, nonFinancialImpact) => {
   const impact = Math.max(financialImpact, nonFinancialImpact);
-  const score  = probability * impact;
-  const level  = getRiskLevel(score);
+  const score  = probability && impact ? probability * impact : 0;
+  const level  = score ? getRiskLevel(score) : null;
 
   return `
     <div class="risk-form__score">
@@ -93,7 +96,7 @@ const renderScorePreview = (probability, financialImpact, nonFinancialImpact) =>
         <span class="risk-form__score-label">Рівень ризику</span>
         <span class="risk-form__score-value risk-form__score-value--total">
           ${score || '—'}
-          ${score ? `<span class="badge ${level.class}">${level.label}</span>` : ''}
+          ${level ? `<span class="badge ${level.class}">${level.label}</span>` : ''}
         </span>
       </div>
     </div>
@@ -230,7 +233,7 @@ const renderForm = (data = {}) => {
                   >${data.riskDesc || ''}</textarea>
                 </div>
 
-                <div class="risk-form__field">
+                <div class="risk-form__field risk-form__field--full">
                   <label class="risk-form__label">Джерело інформації про ризик</label>
                   <input
                     type="text"
@@ -241,7 +244,7 @@ const renderForm = (data = {}) => {
                   />
                 </div>
 
-                <div class="risk-form__field">
+                <div class="risk-form__field risk-form__field--full">
                   <label class="risk-form__label">Опис інформації з джерела</label>
                   <textarea
                     class="risk-form__textarea"
@@ -258,49 +261,38 @@ const renderForm = (data = {}) => {
             <div class="risk-form__section">
               <h3 class="risk-form__section-title">Оцінка ризику</h3>
 
-              <!-- Score preview -->
               <div id="score-preview">
                 ${renderScorePreview(
-                  data.probability || 0,
-                  data.financialImpact || 0,
+                  data.probability        || 0,
+                  data.financialImpact    || 0,
                   data.nonFinancialImpact || 0
                 )}
               </div>
 
-              <!-- Імовірність -->
               <div class="risk-form__field risk-form__field--full">
                 <label class="risk-form__label">
                   Значення імовірності ризику
                   <span class="risk-form__required">*</span>
                 </label>
-                <div class="risk-form__radio-group" id="probability-group">
-                  ${renderRadioGroup('probability', PROBABILITY_OPTIONS, data.probability)}
-                </div>
+                ${renderRadioGroup('probability', PROBABILITY_OPTIONS, data.probability)}
               </div>
 
-              <!-- Фінансовий вплив -->
               <div class="risk-form__field risk-form__field--full">
                 <label class="risk-form__label">
                   Значення фінансового впливу ризику
                   <span class="risk-form__required">*</span>
                 </label>
-                <div class="risk-form__radio-group" id="financial-group">
-                  ${renderRadioGroup('financialImpact', FINANCIAL_IMPACT_OPTIONS, data.financialImpact)}
-                </div>
+                ${renderRadioGroup('financialImpact', FINANCIAL_IMPACT_OPTIONS, data.financialImpact)}
               </div>
 
-              <!-- Нефінансовий вплив -->
               <div class="risk-form__field risk-form__field--full">
                 <label class="risk-form__label">
                   Значення нефінансового впливу ризику
                   <span class="risk-form__required">*</span>
                 </label>
-                <div class="risk-form__radio-group" id="non-financial-group">
-                  ${renderRadioGroup('nonFinancialImpact', NON_FINANCIAL_IMPACT_OPTIONS, data.nonFinancialImpact)}
-                </div>
+                ${renderRadioGroup('nonFinancialImpact', NON_FINANCIAL_IMPACT_OPTIONS, data.nonFinancialImpact)}
               </div>
 
-              <!-- Опис рівня ризику -->
               <div class="risk-form__field risk-form__field--full">
                 <label class="risk-form__label">
                   Опис рівня ризику
@@ -323,9 +315,7 @@ const renderForm = (data = {}) => {
               <div class="risk-form__grid">
 
                 <div class="risk-form__field">
-                  <label class="risk-form__label">
-                    Фактичні втрати за останні 3 роки
-                  </label>
+                  <label class="risk-form__label">Фактичні втрати за останні 3 роки</label>
                   <input
                     type="text"
                     class="risk-form__input"
@@ -336,9 +326,7 @@ const renderForm = (data = {}) => {
                 </div>
 
                 <div class="risk-form__field">
-                  <label class="risk-form__label">
-                    Номер плану заходу
-                  </label>
+                  <label class="risk-form__label">Номер плану заходу</label>
                   <input
                     type="text"
                     class="risk-form__input"
@@ -377,26 +365,23 @@ const renderForm = (data = {}) => {
    ================== */
 const validateForm = (formData) => {
   const errors = [];
-
-  if (!formData.get('instrument'))  errors.push('Оберіть інструмент ідентифікації');
-  if (!formData.get('direction'))   errors.push('Оберіть напрям діяльності');
-  if (!formData.get('processName')) errors.push('Введіть назву процесу');
-  if (!formData.get('riskName'))    errors.push('Введіть назву ризику');
-  if (!formData.get('riskDesc'))    errors.push('Введіть опис ризику');
-  if (!formData.get('probability')) errors.push('Оберіть значення імовірності');
-  if (!formData.get('financialImpact'))    errors.push('Оберіть фінансовий вплив');
-  if (!formData.get('nonFinancialImpact')) errors.push('Оберіть нефінансовий вплив');
-  if (!formData.get('riskLevelDesc'))      errors.push('Введіть опис рівня ризику');
-
+  if (!formData.get('instrument'))        errors.push('Оберіть інструмент ідентифікації');
+  if (!formData.get('direction'))         errors.push('Оберіть напрям діяльності');
+  if (!formData.get('processName'))       errors.push('Введіть назву процесу');
+  if (!formData.get('riskName'))          errors.push('Введіть назву ризику');
+  if (!formData.get('riskDesc'))          errors.push('Введіть опис ризику');
+  if (!formData.get('probability'))       errors.push('Оберіть значення імовірності');
+  if (!formData.get('financialImpact'))   errors.push('Оберіть фінансовий вплив');
+  if (!formData.get('nonFinancialImpact'))errors.push('Оберіть нефінансовий вплив');
+  if (!formData.get('riskLevelDesc'))     errors.push('Введіть опис рівня ризику');
   return errors;
 };
 
 /* ==================
-   COLLECT FORM DATA
+   COLLECT DATA
    ================== */
 const collectFormData = (form) => {
-  const fd = new FormData(form);
-
+  const fd                 = new FormData(form);
   const probability        = Number(fd.get('probability'));
   const financialImpact    = Number(fd.get('financialImpact'));
   const nonFinancialImpact = Number(fd.get('nonFinancialImpact'));
@@ -427,71 +412,11 @@ const collectFormData = (form) => {
 };
 
 /* ==================
-   BIND FORM EVENTS
-   ================== */
-const bindFormEvents = (onSubmit) => {
-  const modal  = document.getElementById('risk-form-modal');
-  const form   = document.getElementById('risk-form');
-  if (!modal || !form) return;
-
-  // Close
-  document.getElementById('risk-form-close')
-    ?.addEventListener('click', () => removeModal());
-  document.getElementById('risk-form-cancel')
-    ?.addEventListener('click', () => removeModal());
-
-  // Close on overlay click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) removeModal();
-  });
-
-  // Close on Escape
-  const onEscape = (e) => {
-    if (e.key === 'Escape') {
-      removeModal();
-      document.removeEventListener('keydown', onEscape);
-    }
-  };
-  document.addEventListener('keydown', onEscape);
-
-  // Radio — оновлення score preview + підсвітка
-  form.querySelectorAll('.risk-form__radio-input').forEach(input => {
-    input.addEventListener('change', () => {
-      // Підсвічуємо вибраний radio
-      const group = input.closest('.risk-form__radio-group');
-      group?.querySelectorAll('.risk-form__radio').forEach(r =>
-        r.classList.remove('risk-form__radio--selected')
-      );
-      input.closest('.risk-form__radio')
-        ?.classList.add('risk-form__radio--selected');
-
-      // Оновлюємо score
-      updateScorePreview(form);
-    });
-  });
-
-  // Submit
-  document.getElementById('risk-form-submit')
-    ?.addEventListener('click', () => {
-      const errors = validateForm(new FormData(form));
-
-      if (errors.length) {
-        showFormErrors(errors);
-        return;
-      }
-
-      const data = collectFormData(form);
-      onSubmit(data);
-      removeModal();
-    });
-};
-
-/* ==================
    UPDATE SCORE
    ================== */
 const updateScorePreview = (form) => {
-  const probability        = Number(form.querySelector('[name="probability"]:checked')?.value || 0);
-  const financialImpact    = Number(form.querySelector('[name="financialImpact"]:checked')?.value || 0);
+  const probability        = Number(form.querySelector('[name="probability"]:checked')?.value        || 0);
+  const financialImpact    = Number(form.querySelector('[name="financialImpact"]:checked')?.value    || 0);
   const nonFinancialImpact = Number(form.querySelector('[name="nonFinancialImpact"]:checked')?.value || 0);
 
   const preview = document.getElementById('score-preview');
@@ -512,15 +437,12 @@ const showFormErrors = (errors) => {
   toast.className = 'risk-form__errors';
   toast.innerHTML = `
     <span class="material-symbols-rounded">error</span>
-    <ul>
-      ${errors.map(e => `<li>${e}</li>`).join('')}
-    </ul>
+    <ul>${errors.map(e => `<li>${e}</li>`).join('')}</ul>
   `;
 
   document.querySelector('.modal__body')?.prepend(toast);
   toast.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  setTimeout(() => toast.remove(), 5000);
+  setTimeout(() => toast?.remove(), 5000);
 };
 
 /* ==================
@@ -532,16 +454,68 @@ const removeModal = () => {
 };
 
 /* ==================
+   BIND EVENTS
+   ================== */
+const bindFormEvents = (onSubmit) => {
+  const modal = document.getElementById('risk-form-modal');
+  const form  = document.getElementById('risk-form');
+  if (!modal || !form) return;
+
+  // Close
+  document.getElementById('risk-form-close')
+    ?.addEventListener('click', removeModal);
+  document.getElementById('risk-form-cancel')
+    ?.addEventListener('click', removeModal);
+
+  // Overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) removeModal();
+  });
+
+  // Escape
+  const onEscape = (e) => {
+    if (e.key === 'Escape') {
+      removeModal();
+      document.removeEventListener('keydown', onEscape);
+    }
+  };
+  document.addEventListener('keydown', onEscape);
+
+  // Radio cards
+  form.querySelectorAll('.risk-form__radio-input').forEach(input => {
+    input.addEventListener('change', () => {
+      const group = input.closest('.risk-form__radio-cards');
+      group?.querySelectorAll('.risk-form__radio-card').forEach(c =>
+        c.classList.remove('risk-form__radio-card--selected')
+      );
+      input.closest('.risk-form__radio-card')
+        ?.classList.add('risk-form__radio-card--selected');
+      updateScorePreview(form);
+    });
+  });
+
+  // Submit
+  document.getElementById('risk-form-submit')
+    ?.addEventListener('click', () => {
+      const errors = validateForm(new FormData(form));
+      if (errors.length) {
+        showFormErrors(errors);
+        return;
+      }
+      const data = collectFormData(form);
+      onSubmit(data);
+      removeModal();
+    });
+};
+
+/* ==================
    OPEN FORM
    ================== */
 export const openRiskForm = (onSubmit, data = {}) => {
-  // Видали попередній якщо є
   removeModal();
-
   document.body.insertAdjacentHTML('beforeend', renderForm(data));
   document.body.style.overflow = 'hidden';
 
-  // Animate in
   requestAnimationFrame(() => {
     document.getElementById('risk-form-modal')
       ?.classList.add('modal--open');
