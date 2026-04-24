@@ -1,4 +1,6 @@
-  /* src/styles/pages/risks.css */
+/* =============================================
+   src/styles/pages/risks.css
+   ============================================= */
 
 /* ==================
    PAGE HEADER
@@ -161,18 +163,30 @@
 
 .risk-details__grid {
   display: grid;
+  gap: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.risk-details__grid:last-child {
+  margin-bottom: 0;
+}
+
+.risk-details__grid--1 {
+  grid-template-columns: 1fr;
+}
+
+.risk-details__grid--3 {
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
+}
+
+.risk-details__grid--4 {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .risk-details__group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xs);
-}
-
-.risk-details__group--full {
-  grid-column: 1 / -1;
 }
 
 .risk-details__label {
@@ -191,6 +205,175 @@
   align-items: center;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
+}
+
+/* ==================
+   MEASURES
+   ================== */
+.risk-measures {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.risk-measures__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.risk-measures__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.risk-measures__title .material-symbols-rounded {
+  font-size: 1.125rem;
+  color: var(--color-primary);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.risk-measures__empty {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.risk-measures__empty .material-symbols-rounded {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.risk-measures__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* ==================
+   MEASURE CARD
+   ================== */
+.measure-card {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.measure-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.measure-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.measure-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.measure-card__id {
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.measure-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.measure-card:hover .measure-card__actions {
+  opacity: 1;
+}
+
+.measure-card__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.measure-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-base);
+}
+
+.measure-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+.measure-card__info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.measure-card__info--danger {
+  color: var(--color-danger);
+}
+
+.measure-card__info .material-symbols-rounded {
+  font-size: 0.875rem;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.measure-card__execution {
+  padding: var(--spacing-sm);
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--color-primary);
+}
+
+.measure-card__execution-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.measure-card__execution-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-base);
 }
 
 /* ==================
@@ -229,7 +412,11 @@
    RESPONSIVE
    ================== */
 @media (max-width: 1280px) {
-  .risk-details__grid {
+  .risk-details__grid--3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .risk-details__grid--4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -239,13 +426,18 @@
     flex-direction: column;
   }
 
-  .risk-details__grid {
+  .risk-details__grid--3 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .risk-details__grid {
+  .risk-details__grid--3,
+  .risk-details__grid--4 {
     grid-template-columns: 1fr;
+  }
+
+  .risks-tabs {
+    overflow-x: auto;
   }
 }
