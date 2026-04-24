@@ -1,0 +1,181 @@
+/* src/styles/components/risk-stats.css */
+
+.risk-stats {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.risk-stats__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+/* ==================
+   SECTIONS
+   ================== */
+.risk-stats__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.risk-stats__section-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ==================
+   STAT CARDS
+   ================== */
+.risk-stats__cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.risk-stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  transition: border-color var(--transition-fast);
+}
+
+.risk-stat-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.risk-stat-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.risk-stat-card__icon .material-symbols-rounded {
+  font-size: 1.125rem;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Color variants */
+.risk-stat-card--danger .risk-stat-card__icon {
+  background-color: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+.risk-stat-card--warning .risk-stat-card__icon {
+  background-color: var(--color-warning-subtle);
+  color: var(--color-warning);
+}
+
+.risk-stat-card--success .risk-stat-card__icon {
+  background-color: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.risk-stat-card--info .risk-stat-card__icon {
+  background-color: var(--color-info-subtle);
+  color: var(--color-info);
+}
+
+.risk-stat-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.risk-stat-card__value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.risk-stat-card--danger .risk-stat-card__value  { color: var(--color-danger);  }
+.risk-stat-card--warning .risk-stat-card__value { color: var(--color-warning); }
+.risk-stat-card--success .risk-stat-card__value { color: var(--color-success); }
+
+.risk-stat-card__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.risk-stat-card__hint {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}
+
+/* ==================
+   LEVEL BARS
+   ================== */
+.risk-stats__levels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.risk-level-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.risk-level-bar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.risk-level-bar__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.risk-level-bar__count {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.risk-level-bar__track {
+  height: 6px;
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.risk-level-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  min-width: 2px;
+}
+
+.risk-level-bar__fill--critical  { background-color: var(--color-risk-critical);  }
+.risk-level-bar__fill--very-high { background-color: var(--color-risk-very-high); }
+.risk-level-bar__fill--high      { background-color: var(--color-risk-high);      }
+.risk-level-bar__fill--medium    { background-color: var(--color-risk-medium);    }
+.risk-level-bar__fill--low       { background-color: var(--color-risk-low);       }
