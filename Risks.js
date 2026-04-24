@@ -9,6 +9,9 @@ import {
 } from '../../data/risks.mock.js';
 
 import { createRiskMatrix } from '../../components/RiskMatrix.js';
+import { openRiskForm }     from '../../components/RiskForm.js';
+import { openMeasureForm }  from '../../components/MeasureForm.js';
+import { MEASURE_STATUSES } from '../../data/measures.mock.js';
 
 const TABS = [
   { id: 'registry', label: 'Реєстр ризиків'        },
@@ -24,6 +27,7 @@ let state = {
   perPage:      10,
   matrixFilter: null,
   risks:        [...RISKS_MOCK],
+  measures:     {},
 };
 
 /* ==================
@@ -130,96 +134,202 @@ const renderPagination = (totalPages) => {
 };
 
 /* ==================
+   MEASURE CARD
+   ================== */
+const renderMeasureCard = (measure) => {
+  const status   = MEASURE_STATUSES[measure.status];
+  const deadline = new Date(measure.deadline).toLocaleDateString('uk-UA');
+  const isOverdue = measure.status !== 'DONE' &&
+                    measure.status !== 'CANCELLED' &&
+                    new Date(measure.deadline) < new Date();
+
+  return `
+    <div class="measure-card" data-measure-id="${measure.id}">
+      <div class="measure-card__header">
+        <div class="measure-card__meta">
+          <span class="measure-card__id">${measure.id}</span>
+          <span class="badge ${status.class}">${status.label}</span>
+          ${isOverdue ? `<span class="badge badge--danger">Прострочено</span>` : ''}
+        </div>
+        <div class="measure-card__actions">
+          <button class="btn btn--ghost btn--icon btn--sm"
+            title="Редагувати"
+            data-action="edit-measure"
+            data-measure-id="${measure.id}"
+            data-risk-id="${measure.riskId}">
+            <span class="material-symbols-rounded">edit</span>
+          </button>
+          <button class="btn btn--ghost btn--icon btn--sm"
+            title="Видалити"
+            data-action="delete-measure"
+            data-measure-id="${measure.id}"
+            data-risk-id="${measure.riskId}">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="measure-card__title">${measure.title}</p>
+      <p class="measure-card__desc">${measure.desc}</p>
+
+      <div class="measure-card__footer">
+        <div class="measure-card__info">
+          <span class="material-symbols-rounded">group</span>
+          ${measure.responsible}
+        </div>
+        <div class="measure-card__info ${isOverdue ? 'measure-card__info--danger' : ''}">
+          <span class="material-symbols-rounded">calendar_today</span>
+          до ${deadline}
+        </div>
+        ${measure.approvedBy && measure.approvedBy !== '—' ? `
+          <div class="measure-card__info">
+            <span class="material-symbols-rounded">gavel</span>
+            ${measure.approvedBy}
+          </div>
+        ` : ''}
+      </div>
+
+      ${measure.executionDesc ? `
+        <div class="measure-card__execution">
+          <p class="measure-card__execution-label">Виконані дії:</p>
+          <p class="measure-card__execution-text">${measure.executionDesc}</p>
+        </div>
+      ` : ''}
+    </div>
+  `;
+};
+
+/* ==================
    ACCORDION DETAILS
    ================== */
 const renderDetails = (risk) => {
-  const prob    = PROBABILITY_LEVELS[risk.probability];
-  const finImp  = IMPACT_LEVELS[risk.financialImpact];
-  const nfinImp = IMPACT_LEVELS[risk.nonFinancialImpact];
+  const prob     = PROBABILITY_LEVELS[risk.probability];
+  const finImp   = IMPACT_LEVELS[risk.financialImpact];
+  const nfinImp  = IMPACT_LEVELS[risk.nonFinancialImpact];
+  const level    = getRiskLevel(risk.riskScore);
+  const measures = state.measures[risk.id] || [];
 
   return `
     <tr class="risk-details-row" id="details-${risk.id}">
       <td colspan="8" class="risk-details-cell">
         <div class="risk-details">
-          <div class="risk-details__grid">
 
+          <!-- Рядок 1: Інструмент -->
+          <div class="risk-details__grid risk-details__grid--1">
             <div class="risk-details__group">
-              <p class="risk-details__label">Код ЄДРПОУ</p>
-              <p class="risk-details__value">${risk.edrpou}</p>
-            </div>
-
-            <div class="risk-details__group">
-              <p class="risk-details__label">Інструмент ідентифікації</p>
+              <p class="risk-details__label">Інструмент ідентифікації ризику</p>
               <p class="risk-details__value">${risk.instrument}</p>
             </div>
+          </div>
 
+          <!-- Рядок 2: Процес -->
+          <div class="risk-details__grid risk-details__grid--3">
             <div class="risk-details__group">
               <p class="risk-details__label">Назва процесу</p>
               <p class="risk-details__value">${risk.processName}</p>
             </div>
-
-            <div class="risk-details__group risk-details__group--full">
+            <div class="risk-details__group">
               <p class="risk-details__label">Опис процесу</p>
               <p class="risk-details__value">${risk.processDesc}</p>
             </div>
-
-            <div class="risk-details__group risk-details__group--full">
+            <div class="risk-details__group">
               <p class="risk-details__label">Назва ВНД та дата затвердження</p>
               <p class="risk-details__value">${risk.vndName}</p>
             </div>
+          </div>
 
-            <div class="risk-details__group risk-details__group--full">
+          <!-- Рядок 3: Ризик -->
+          <div class="risk-details__grid risk-details__grid--3">
+            <div class="risk-details__group">
               <p class="risk-details__label">Опис ризику</p>
               <p class="risk-details__value">${risk.riskDesc}</p>
             </div>
-
             <div class="risk-details__group">
               <p class="risk-details__label">Джерело інформації</p>
               <p class="risk-details__value">${risk.infoSource}</p>
             </div>
-
-            <div class="risk-details__group risk-details__group--full">
+            <div class="risk-details__group">
               <p class="risk-details__label">Опис інформації з джерела</p>
               <p class="risk-details__value">${risk.infoSourceDesc}</p>
             </div>
+          </div>
 
+          <!-- Рядок 4: Бали -->
+          <div class="risk-details__grid risk-details__grid--4">
             <div class="risk-details__group">
               <p class="risk-details__label">Імовірність (бал)</p>
               <p class="risk-details__value">
                 ${risk.probability} — ${badge(prob.label, prob.class)}
               </p>
             </div>
-
             <div class="risk-details__group">
               <p class="risk-details__label">Фінансовий вплив (бал)</p>
               <p class="risk-details__value">
                 ${risk.financialImpact} — ${badge(finImp.label, finImp.class)}
               </p>
             </div>
-
             <div class="risk-details__group">
               <p class="risk-details__label">Нефінансовий вплив (бал)</p>
               <p class="risk-details__value">
                 ${risk.nonFinancialImpact} — ${badge(nfinImp.label, nfinImp.class)}
               </p>
             </div>
+            <div class="risk-details__group">
+              <p class="risk-details__label">Рівень ризику (бал)</p>
+              <p class="risk-details__value">
+                ${risk.riskScore} — ${badge(level.label, level.class)}
+              </p>
+            </div>
+          </div>
 
+          <!-- Рядок 5: Опис рівня -->
+          <div class="risk-details__grid risk-details__grid--1">
+            <div class="risk-details__group">
+              <p class="risk-details__label">Опис рівня ризику</p>
+              <p class="risk-details__value">${risk.riskLevelDesc}</p>
+            </div>
+          </div>
+
+          <!-- Рядок 6: Втрати -->
+          <div class="risk-details__grid risk-details__grid--3">
             <div class="risk-details__group">
               <p class="risk-details__label">Фактичні втрати за 3 роки</p>
               <p class="risk-details__value">${risk.actualLosses}</p>
             </div>
-
-            <div class="risk-details__group risk-details__group--full">
-              <p class="risk-details__label">Опис рівня ризику</p>
-              <p class="risk-details__value">${risk.riskLevelDesc}</p>
-            </div>
-
-            <div class="risk-details__group">
-              <p class="risk-details__label">Номер плану заходу</p>
-              <p class="risk-details__value">${risk.measureNumber}</p>
-            </div>
-
           </div>
+
+          <!-- Заходи мінімізації -->
+          <div class="risk-measures">
+            <div class="risk-measures__header">
+              <p class="risk-measures__title">
+                <span class="material-symbols-rounded">task_alt</span>
+                Заходи мінімізації
+                ${measures.length
+                  ? `<span class="badge badge--primary">${measures.length}</span>`
+                  : ''
+                }
+              </p>
+              <button
+                class="btn btn--primary btn--sm"
+                data-action="add-measure"
+                data-risk-id="${risk.id}">
+                <span class="material-symbols-rounded">add</span>
+                Додати захід
+              </button>
+            </div>
+
+            ${measures.length ? `
+              <div class="risk-measures__list">
+                ${measures.map(m => renderMeasureCard(m)).join('')}
+              </div>
+            ` : `
+              <div class="risk-measures__empty">
+                <span class="material-symbols-rounded">playlist_add</span>
+                <p>Заходів ще немає. Додайте перший захід мінімізації.</p>
+              </div>
+            `}
+          </div>
+
         </div>
       </td>
     </tr>
@@ -254,7 +364,7 @@ const renderRow = (risk) => {
       <td class="table__td table__td--center">
         <strong>${risk.riskScore}</strong>
       </td>
-      <td class="table__td table__td--center">
+      <td class="table__td">
         ${badge(level.label, level.class)}
       </td>
       <td class="table__td">
@@ -302,7 +412,6 @@ const renderRegistry = () => {
 
   return `
     <div class="risks-layout">
-
       <div class="risks-layout__main">
         ${renderToolbar()}
         <div class="table-wrapper">
@@ -324,7 +433,7 @@ const renderRegistry = () => {
                 <th class="table__th">Напрям діяльності</th>
                 <th class="table__th table__th--center">Імовірність</th>
                 <th class="table__th table__th--center">Рівень (бал)</th>
-                <th class="table__th table__th--center">Рівень ризику</th>
+                <th class="table__th">Рівень ризику</th>
                 <th class="table__th">Статус</th>
                 <th class="table__th table__th--right">Дії</th>
               </tr>
@@ -344,7 +453,6 @@ const renderRegistry = () => {
       </div>
 
       <div class="risks-layout__matrix" id="risk-matrix-container"></div>
-
     </div>
   `;
 };
@@ -395,10 +503,16 @@ const renderPage = () => `
    ================== */
 const handleAction = (action, id, container) => {
   switch (action) {
-    case 'edit':
-      console.log('[Risks] Edit:', id);
+    case 'edit': {
+      const risk = state.risks.find(r => r.id === id);
+      if (!risk) return;
+      openRiskForm((updated) => {
+        state.risks = state.risks.map(r => r.id === id ? { ...r, ...updated } : r);
+        rerenderContent(container);
+      }, { ...risk, edit: true });
       break;
-    case 'copy':
+    }
+    case 'copy': {
       const risk = state.risks.find(r => r.id === id);
       if (risk) {
         const copy = {
@@ -410,13 +524,16 @@ const handleAction = (action, id, container) => {
         rerenderContent(container);
       }
       break;
-    case 'delete':
+    }
+    case 'delete': {
       if (confirm('Видалити цей ризик?')) {
         state.risks       = state.risks.filter(r => r.id !== id);
         state.expandedRow = null;
+        delete state.measures[id];
         rerenderContent(container);
       }
       break;
+    }
   }
 };
 
@@ -444,7 +561,7 @@ const bindEvents = (container) => {
       rerenderContent(container);
     });
 
-  // Clear matrix filter badge
+  // Clear matrix filter
   container.querySelector('#clear-matrix-filter')
     ?.addEventListener('click', () => {
       state.matrixFilter = null;
@@ -454,6 +571,7 @@ const bindEvents = (container) => {
 
   // Row expand
   container.querySelectorAll('[data-risk-id]').forEach(row => {
+    if (row.tagName !== 'TR') return;
     row.addEventListener('click', (e) => {
       if (e.target.closest('[data-action]')) return;
       const id          = Number(row.dataset.riskId);
@@ -462,8 +580,8 @@ const bindEvents = (container) => {
     });
   });
 
-  // Actions
-  container.querySelectorAll('[data-action]').forEach(btn => {
+  // Risk actions (edit, copy, delete)
+  container.querySelectorAll('[data-action="edit"], [data-action="copy"], [data-action="delete"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const action = btn.dataset.action;
@@ -487,9 +605,63 @@ const bindEvents = (container) => {
   container.querySelector('#export-pdf')
     ?.addEventListener('click', () => console.log('[Risks] Export PDF'));
 
-  // Add
+  // Add risk
   container.querySelector('#add-risk')
-    ?.addEventListener('click', () => console.log('[Risks] Add risk'));
+    ?.addEventListener('click', () => {
+      openRiskForm((newRisk) => {
+        state.risks.unshift(newRisk);
+        state.currentPage = 1;
+        rerenderContent(container);
+      });
+    });
+
+  // Add measure
+  container.querySelectorAll('[data-action="add-measure"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const riskId = Number(btn.dataset.riskId);
+      const risk   = state.risks.find(r => r.id === riskId);
+      if (!risk) return;
+
+      openMeasureForm(riskId, risk.riskName, (measure) => {
+        if (!state.measures[riskId]) state.measures[riskId] = [];
+        state.measures[riskId].push(measure);
+        rerenderContent(container);
+      });
+    });
+  });
+
+  // Edit measure
+  container.querySelectorAll('[data-action="edit-measure"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const riskId    = Number(btn.dataset.riskId);
+      const measureId = btn.dataset.measureId;
+      const risk      = state.risks.find(r => r.id === riskId);
+      const measure   = state.measures[riskId]?.find(m => m.id === measureId);
+      if (!risk || !measure) return;
+
+      openMeasureForm(riskId, risk.riskName, (updated) => {
+        state.measures[riskId] = state.measures[riskId]
+          .map(m => m.id === measureId ? updated : m);
+        rerenderContent(container);
+      }, { ...measure, edit: true });
+    });
+  });
+
+  // Delete measure
+  container.querySelectorAll('[data-action="delete-measure"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const riskId    = Number(btn.dataset.riskId);
+      const measureId = btn.dataset.measureId;
+      if (confirm('Видалити цей захід?')) {
+        state.measures[riskId] = state.measures[riskId]
+          .filter(m => m.id !== measureId);
+        rerenderContent(container);
+      }
+    });
+  });
 
   // Matrix
   const matrixContainer = container.querySelector('#risk-matrix-container');
@@ -534,6 +706,7 @@ const Risks = async (container) => {
     perPage:      10,
     matrixFilter: null,
     risks:        [...RISKS_MOCK],
+    measures:     {},
   };
 
   container.innerHTML = renderPage();
