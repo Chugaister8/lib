@@ -1,0 +1,275 @@
+/* src/styles/pages/thematic.css */
+
+.thematic-page__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* ==================
+   ASSESSMENT CARD
+   ================== */
+.thematic-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  overflow: hidden;
+}
+
+.thematic-card--open {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.thematic-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.thematic-card__left {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.thematic-card__toggle {
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.thematic-card__toggle:hover {
+  color: var(--color-text);
+}
+
+.thematic-card__chevron {
+  font-family: 'Material Symbols Rounded';
+  font-size: 1.25rem;
+  transition: transform var(--transition-fast);
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.thematic-card__chevron--open {
+  transform: rotate(90deg);
+  color: var(--color-primary);
+}
+
+.thematic-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.thematic-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.thematic-card__id {
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.thematic-card__approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-success);
+}
+
+.thematic-card__approved .material-symbols-rounded {
+  font-size: 0.875rem;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.thematic-card__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.thematic-card__footer-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.thematic-card__footer-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thematic-card__footer-meta .material-symbols-rounded {
+  font-size: 0.875rem;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.thematic-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+/* ==================
+   CARD DETAILS
+   ================== */
+.thematic-card__details {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.thematic-card__desc {
+  margin-bottom: var(--spacing-lg);
+}
+
+.thematic-card__risks-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-md);
+}
+
+.thematic-card__risks-title .material-symbols-rounded {
+  font-size: 1rem;
+  color: var(--color-warning);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+/* ==================
+   RISK ITEM
+   ================== */
+.thematic-risk-item {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.thematic-risk-item__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.thematic-risk-item__id {
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.thematic-risk-item__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ==================
+   RISK BLOCK IN FORM
+   ================== */
+.thematic-risk-block {
+  background-color: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.thematic-risk-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.thematic-risk-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.thematic-risk-block__title .material-symbols-rounded {
+  font-size: 1rem;
+  color: var(--color-warning);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.thematic-risk-block__id {
+  font-size: var(--font-size-xs);
+  font-family: monospace;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-card);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.thematic-risk-block__section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.thematic-risk-block__section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-md);
+}
+
+/* ==================
+   SUCCESS BUTTON
+   ================== */
+.btn--success {
+  background-color: var(--color-success);
+  color: #ffffff;
+  border: 1px solid var(--color-success);
+}
+
+.btn--success:hover {
+  background-color: #15803d;
+  border-color: #15803d;
+}
