@@ -1,0 +1,106 @@
+/* src/styles/pages/escalation.css */
+
+/* ==================
+   FINANCIAL IMPACT
+   ================== */
+.escalation-financial {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-warning);
+}
+
+.escalation-financial__value--danger {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.escalation-financial__value--success {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.escalation-financial__total {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.escalation-financial__total-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.escalation-financial__total-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ==================
+   OTHER COMPANIES
+   ================== */
+.escalation-companies {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-bg-hover);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-info);
+}
+
+.escalation-companies__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.escalation-company-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.escalation-company-card__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.escalation-company-card__edrpou {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-family: monospace;
+}
+
+.escalation-company-card__amount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-danger);
+}
+
+/* ==================
+   COMPANY ROW IN FORM
+   ================== */
+.escalation-company-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.escalation-company-row .risk-form__input {
+  flex: 1;
+  min-width: 160px;
+}
